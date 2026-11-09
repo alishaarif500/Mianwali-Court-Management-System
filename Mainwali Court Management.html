@@ -1,0 +1,403 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Mianwali Court Management System</title>
+  <style>
+    /* ====== Basic Reset ====== */
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:#f4f7fb;color:#0b2545}
+    a{color:inherit;text-decoration:none}
+
+    /* ====== Layout ====== */
+    header{background:linear-gradient(90deg,#0b5bd8,#0b4bbd);color:white;padding:18px 24px;display:flex;align-items:center;justify-content:space-between}
+    .brand{display:flex;gap:12px;align-items:center}
+    .logo{width:48px;height:48px;border-radius:6px;background:#ffffff22;display:flex;align-items:center;justify-content:center;font-weight:700}
+    nav a{color:rgba(255,255,255,0.95);margin-left:18px;font-weight:600}
+
+    .container{max-width:1100px;margin:28px auto;padding:0 18px}
+    .grid{display:grid;gap:18px}
+    .two-col{grid-template-columns:2fr 1fr}
+
+    /* ====== Cards ====== */
+    .card{background:white;border-radius:10px;padding:16px;box-shadow:0 6px 18px rgba(11,37,69,0.06)}
+    h1,h2{color:#072041}
+
+    /* ====== Search bar ====== */
+    .searchbar{display:flex;gap:8px}
+    .searchbar input{flex:1;padding:10px 12px;border-radius:8px;border:1px solid #dbe7ff}
+    .btn{background:#0b5bd8;color:white;padding:9px 12px;border-radius:8px;border:none;cursor:pointer;font-weight:600}
+    .btn.secondary{background:#eef5ff;color:#0b4bbd}
+
+    /* ====== Table ====== */
+    table{width:100%;border-collapse:collapse}
+    th,td{padding:10px 8px;text-align:left;border-bottom:1px solid #f0f3f8}
+    th{font-weight:700;color:#12345a}
+
+    /* ====== Forms ====== */
+    form .row{display:flex;gap:10px;margin-bottom:10px}
+    label{font-size:13px;color:#23465a}
+    input,select,textarea{padding:10px;border:1px solid #e4edf9;border-radius:8px;width:100%}
+
+    /* ====== Sidebar ====== */
+    .sidebar .item{padding:10px;border-radius:8px;margin-bottom:8px;color:#0b3a66;display:flex;justify-content:space-between;align-items:center}
+    .sidebar .item:hover{background:#f4f8ff}
+
+    /* ====== Footer ====== */
+    footer{padding:18px;text-align:center;color:#274a6f}
+
+    /* ====== Responsive ====== */
+    @media (max-width:900px){.two-col{grid-template-columns:1fr}.brand h1{font-size:18px}}
+
+    /* ====== Small helpers ====== */
+    .muted{color:#46637f;font-size:14px}
+    .pill{display:inline-block;padding:6px 10px;border-radius:999px;background:#eef5ff;color:#0b4bbd;font-weight:700}
+
+    /* Simple calendar style for hearings */
+    .calendar{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+    .cal-day{background:#fff;padding:8px;border-radius:8px;min-height:80px;border:1px solid #f0f3f8}
+    .cal-day .date{font-weight:700;color:#0b4bbd}
+    .event{background:#f0f6ff;padding:6px;border-radius:6px;margin-top:6px;font-size:13px}
+
+    /* tiny badge */
+    .badge{background:#f4f7fb;padding:6px 8px;border-radius:6px;font-weight:700}
+
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <div class="logo">MC</div>
+      <div>
+        <div style="font-weight:800">Mianwali Court Management</div>
+        <div style="font-size:13px;opacity:0.92">Digital case & hearing tracker</div>
+      </div>
+    </div>
+    <nav>
+      <a href="#" onclick="show('home')">Home</a>
+      <a href="#" onclick="show('cases')">Cases</a>
+      <a href="#" onclick="show('schedule')">Schedule</a>
+      <a href="#" onclick="show('search')">Public Search</a>
+      <a href="#" onclick="show('contact')">Contact</a>
+      <a href="#" onclick="show('login')" class="badge">Login</a>
+    </nav>
+  </header>
+
+  <main class="container">
+
+    <!-- HOME -->
+    <section id="home" class="grid two-col">
+      <div class="card">
+        <h1>Welcome to Mianwali Court Management</h1>
+        <p class="muted">This demo is a front-end template. Replace client-side mock data with your server endpoints to make it fully functional.</p>
+
+        <div style="margin-top:12px;display:flex;gap:12px;flex-wrap:wrap">
+          <div class="card" style="flex:1;min-width:230px">
+            <div class="muted">Open Cases</div>
+            <div style="font-size:28px;font-weight:800;margin-top:6px" id="stat-open">124</div>
+          </div>
+          <div class="card" style="flex:1;min-width:230px">
+            <div class="muted">Upcoming Hearings (7 days)</div>
+            <div style="font-size:28px;font-weight:800;margin-top:6px" id="stat-hearings">18</div>
+          </div>
+          <div class="card" style="flex:1;min-width:230px">
+            <div class="muted">Registered Lawyers</div>
+            <div style="font-size:28px;font-weight:800;margin-top:6px" id="stat-lawyers">62</div>
+          </div>
+        </div>
+
+        <hr style="margin:18px 0;border:none;border-top:1px solid #f1f6ff">
+
+        <div style="display:flex;gap:12px;align-items:center">
+          <div style="flex:1">
+            <div class="muted">Search case by number</div>
+            <div style="display:flex;gap:8px;margin-top:8px">
+              <input id="quickCase" placeholder="Enter case number (e.g. 2025-MW-001)" />
+              <button class="btn" onclick="quickSearch()">Search</button>
+            </div>
+          </div>
+
+          <div style="width:260px">
+            <div class="muted">Announcements</div>
+            <div class="card" style="margin-top:8px;">
+              <div style="font-weight:700">Court closed on 25 Dec</div>
+              <div class="muted" style="font-size:13px;margin-top:6px">Annual maintenance</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <aside class="sidebar">
+        <div class="card">
+          <h2>Quick actions</h2>
+          <div style="margin-top:8px">
+            <div class="item" onclick="show('cases')">New Case <span class="pill">+ Add</span></div>
+            <div class="item" onclick="show('schedule')">Add Hearing <span class="pill">Schedule</span></div>
+            <div class="item" onclick="show('login')">Manage Users <span class="pill">Admin</span></div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top:12px">
+          <h3>Recent hearings</h3>
+          <ul style="margin-top:8px;list-style:none">
+            <li style="padding:8px 0;border-bottom:1px dashed #eef4ff">2025-11-10 — Case 2025-MW-004</li>
+            <li style="padding:8px 0;border-bottom:1px dashed #eef4ff">2025-11-09 — Case 2025-MW-009</li>
+            <li style="padding:8px 0">2025-11-08 — Case 2025-MW-002</li>
+          </ul>
+        </div>
+      </aside>
+    </section>
+
+    <!-- CASE LIST -->
+    <section id="cases" class="card" style="display:none">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <h2>Case Records</h2>
+        <div>
+          <button class="btn secondary" onclick="renderAddCase()">+ New Case</button>
+        </div>
+      </div>
+
+      <div style="margin-top:12px">
+        <div class="searchbar">
+          <input id="filterText" placeholder="Filter by party, lawyer, or case number" oninput="renderCaseTable()" />
+          <select id="statusFilter" onchange="renderCaseTable()">
+            <option value="all">All statuses</option>
+            <option value="open">Open</option>
+            <option value="closed">Closed</option>
+            <option value="pending">Pending</option>
+          </select>
+        </div>
+
+        <div style="overflow:auto;margin-top:12px">
+          <table id="caseTable">
+            <thead><tr><th>Case #</th><th>Title</th><th>Parties</th><th>Lawyer</th><th>Status</th><th>Next Hearing</th><th>Action</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- SCHEDULE -->
+    <section id="schedule" class="card" style="display:none">
+      <h2>Hearing Schedule</h2>
+      <p class="muted">Week view (static demo)</p>
+      <div style="margin-top:12px" id="calendarWrap"></div>
+    </section>
+
+    <!-- PUBLIC SEARCH -->
+    <section id="search" class="card" style="display:none">
+      <h2>Public Case Search</h2>
+      <p class="muted">Search cases by number or party name (public view)</p>
+      <div style="margin-top:12px" class="searchbar">
+        <input id="publicQuery" placeholder="Case number or party name" />
+        <button class="btn" onclick="runPublicSearch()">Search</button>
+      </div>
+      <div id="publicResults" style="margin-top:12px"></div>
+    </section>
+
+    <!-- LOGIN / SIGNUP (simple demo forms) -->
+    <section id="login" class="card" style="display:none">
+      <h2>Login / Signup</h2>
+      <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:12px">
+        <div style="flex:1;min-width:260px">
+          <h3>Login</h3>
+          <form onsubmit="event.preventDefault();demoLogin()">
+            <label>Email</label>
+            <input id="loginEmail" type="email" required />
+            <label>Password</label>
+            <input id="loginPass" type="password" required />
+            <div style="margin-top:10px">
+              <button class="btn">Login</button>
+            </div>
+          </form>
+        </div>
+        <div style="flex:1;min-width:260px">
+          <h3>Signup (Lawyer)</h3>
+          <form onsubmit="event.preventDefault();demoSignup()">
+            <label>Full name</label>
+            <input id="suName" />
+            <label>Email</label>
+            <input id="suEmail" type="email" />
+            <label>License No.</label>
+            <input id="suLicense" />
+            <div style="margin-top:10px">
+              <button class="btn secondary">Register</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <!-- CONTACT -->
+    <section id="contact" class="card" style="display:none">
+      <h2>Contact & About</h2>
+      <p class="muted">Mianwali District Court — Demo template. Replace this with official details and backend integration before making this public.</p>
+      <div style="display:flex;gap:12px;margin-top:12px;flex-wrap:wrap">
+        <div style="flex:1;min-width:260px">
+          <form onsubmit="event.preventDefault();alert('Message sent (demo)')">
+            <label>Your name</label>
+            <input required />
+            <label>Email</label>
+            <input type="email" required />
+            <label>Message</label>
+            <textarea rows="4" required></textarea>
+            <div style="margin-top:10px"><button class="btn">Send</button></div>
+          </form>
+        </div>
+        <div style="width:320px">
+          <div class="card">
+            <div style="font-weight:700">Court Address</div>
+            <div class="muted" style="margin-top:6px">District Court Mianwali, Main Road, Mianwali</div>
+            <div style="margin-top:8px">Phone: 0451-XXXXXX</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <footer style="margin-top:18px">&copy; <strong>Mianwali Court Management</strong> — Demo template</footer>
+
+  </main>
+
+  <script>
+    // ------- Mock data (replace with API calls) -------
+    const mockCases = [
+      {id:'2025-MW-001',title:'Property dispute',parties:'A vs B',lawyer:'Raza Khan',status:'open',next:'2025-11-20'},
+      {id:'2025-MW-002',title:'Divorce case',parties:'X vs Y',lawyer:'S. Ahmed',status:'pending',next:'2025-11-18'},
+      {id:'2025-MW-003',title:'Motor accident',parties:'P vs Q',lawyer:'M. Ali',status:'closed',next:'-'},
+      {id:'2025-MW-004',title:'Contract dispute',parties:'Corp A vs Corp B',lawyer:'Raza Khan',status:'open',next:'2025-11-22'},
+      {id:'2025-MW-005',title:'Civil suit',parties:'H vs I',lawyer:'F. Khan',status:'open',next:'2025-11-26'},
+    ];
+
+    const mockHearings = [
+      {date:'2025-11-17',case:'2025-MW-002',time:'10:00',judge:'Judge A'},
+      {date:'2025-11-18',case:'2025-MW-001',time:'11:00',judge:'Judge B'},
+      {date:'2025-11-19',case:'2025-MW-004',time:'09:30',judge:'Judge C'},
+    ];
+
+    // ------- Simple SPA navigation (client side) -------
+    function show(id){
+      document.querySelectorAll('main section').forEach(s=>s.style.display='none');
+      document.getElementById(id).style.display='block';
+      window.scrollTo({top:0,behavior:'smooth'});
+      if(id==='cases') renderCaseTable();
+      if(id==='schedule') renderCalendar();
+      if(id==='home') refreshStats();
+    }
+
+    // default
+    show('home');
+
+    function refreshStats(){
+      document.getElementById('stat-open').innerText = mockCases.filter(c=>c.status==='open').length;
+      document.getElementById('stat-hearings').innerText = mockHearings.length;
+      document.getElementById('stat-lawyers').innerText = 62; // demo
+    }
+
+    // ------- Case table rendering & filters -------
+    function renderCaseTable(){
+      const tbody = document.querySelector('#caseTable tbody');
+      tbody.innerHTML='';
+      const q = document.getElementById('filterText').value.toLowerCase();
+      const status = document.getElementById('statusFilter').value;
+      const filtered = mockCases.filter(c=>{
+        const matchQ = !q || (c.id+c.title+c.parties+c.lawyer).toLowerCase().includes(q);
+        const matchStatus = status==='all' || c.status===status;
+        return matchQ && matchStatus;
+      });
+      filtered.forEach(c=>{
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${c.id}</td><td>${c.title}</td><td>${c.parties}</td><td>${c.lawyer}</td><td>${c.status}</td><td>${c.next}</td><td><button class='btn secondary' onclick="viewCase('${c.id}')">View</button></td>`;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function viewCase(id){
+      const c = mockCases.find(x=>x.id===id);
+      if(!c) return alert('Case not found');
+      alert(`Case: ${c.id}\nTitle: ${c.title}\nParties: ${c.parties}\nLawyer: ${c.lawyer}\nStatus: ${c.status}\nNext: ${c.next}`);
+    }
+
+    function renderAddCase(){
+      const formHtml = `
+        <h3>Add New Case (demo)</h3>
+        <form onsubmit="event.preventDefault();addCase()">
+          <label>Case Number</label><input id='newCaseId' required />
+          <label>Title</label><input id='newTitle' required />
+          <label>Parties</label><input id='newParties' required />
+          <label>Lawyer</label><input id='newLawyer' required />
+          <label>Next Hearing</label><input id='newNext' />
+          <div style='margin-top:8px'><button class='btn'>Create Case</button></div>
+        </form>
+      `;
+      const s = document.getElementById('cases');
+      s.scrollIntoView({behavior:'smooth'});
+      s.querySelector('div:nth-child(2)').innerHTML = formHtml;
+    }
+
+    function addCase(){
+      const id = document.getElementById('newCaseId').value;
+      const title = document.getElementById('newTitle').value;
+      const parties = document.getElementById('newParties').value;
+      const lawyer = document.getElementById('newLawyer').value;
+      const next = document.getElementById('newNext').value || '-';
+      mockCases.push({id, title, parties, lawyer, status:'open', next});
+      renderCaseTable();
+      alert('Case added (demo). In real app send this to server.');
+    }
+
+    // ------- Calendar render (very simple week demo) -------
+    function renderCalendar(){
+      const wrap = document.getElementById('calendarWrap');
+      const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+      const start = new Date(); // week of today
+      start.setDate(start.getDate() - start.getDay());
+      let html = '<div class="calendar">';
+      for(let i=0;i<7;i++){
+        const d = new Date(start);
+        d.setDate(start.getDate()+i);
+        const dateStr = d.toISOString().slice(0,10);
+        html += `<div class='cal-day card'><div class='date'>${days[d.getDay()]} <div style="font-size:12px">${dateStr}</div></div>`;
+        mockHearings.filter(h=>h.date===dateStr).forEach(e=>{
+          html += `<div class='event'>${e.time} - ${e.case} <div style='font-weight:600'>${e.judge}</div></div>`;
+        });
+        html += '</div>';
+      }
+      html += '</div>';
+      wrap.innerHTML = html;
+    }
+
+    // ------- Public search -------
+    function runPublicSearch(){
+      const q = document.getElementById('publicQuery').value.toLowerCase();
+      const results = mockCases.filter(c=> (c.id+c.parties).toLowerCase().includes(q));
+      const el = document.getElementById('publicResults');
+      if(!results.length){ el.innerHTML = '<div class="card">No results (demo)</div>'; return }
+      el.innerHTML = results.map(r=>`<div class='card' style='margin-bottom:8px'><strong>${r.id} — ${r.title}</strong><div class='muted'>Parties: ${r.parties}</div><div style='margin-top:6px'>Status: <span class='pill'>${r.status}</span> Next: ${r.next}</div></div>`).join('\n');
+    }
+
+    // ------- Quick search from home -------
+    function quickSearch(){
+      const q = document.getElementById('quickCase').value.trim();
+      if(!q) return; const c = mockCases.find(x=>x.id===q);
+      if(!c){ alert('No public case found (demo)'); return }
+      alert(`Public view\n${c.id} - ${c.title}\nNext: ${c.next}`);
+    }
+
+    // ------- Login / Signup demo handlers -------
+    function demoLogin(){
+      const e = document.getElementById('loginEmail').value;
+      alert('Logged in (demo) as '+e+' — in real app verify credentials with server');
+      // You can route to dashboard here
+    }
+    function demoSignup(){
+      const name = document.getElementById('suName').value;
+      alert('Registered (demo): '+name+' — in real app send to server for approval');
+    }
+
+    // initial render of case table for when user opens Cases
+    // renderCaseTable(); // runs on show('cases')
+  </script>
+</body>
+</html>
